@@ -1,6 +1,7 @@
 import React from 'react';
 import AceEditor from 'react-ace';
 import marked from 'marked';
+import classnames from 'classnames';
 
 import 'brace/mode/markdown';
 
@@ -10,16 +11,24 @@ require(`brace/theme/${theme}`);
 const PostEditor = React.createClass({
   getInitialState() {
     return {
-      body: this.props.post.body
+      body: this.props.post.body,
+      metaExpanded: false
     };
+  },
+  toggleMeta(ev) {
+    ev.preventDefault();
+    this.setState({
+      metaExpanded: !this.state.metaExpanded
+    });
   },
   render() {
     let preview = marked(this.state.body);
     let {
-      meta: { title, date }
+      meta: { title, date },
+      meta
     } = this.props.post;
     return (
-      <div className="je-post-editor">
+      <div className={classnames('je-post-editor', { 'meta-expanded': this.state.metaExpanded })}>
         <div className="je-post-summary">
           <div className="je-editor-actions">
             <h2>{title}</h2>
@@ -41,6 +50,19 @@ const PostEditor = React.createClass({
                 <input id="je-fe-date" type="text" value={date} />
               </div>
             </div>
+            <div className="je-post-meta-extra">
+              { Object.keys(meta).filter(k => k !== 'title' && k !== 'date').map(k => {
+                return (
+                  <div className="je-input-group">
+                    <label htmlFor={`je-fe-${k}`}>{k}</label>
+                    <div className="je-input-wrapper">
+                      <input id={`je-fe-${k}`} type="text" value={meta[k]} />
+                    </div>
+                  </div>
+                );
+              }) }
+            </div>
+            <a onClick={this.toggleMeta} className="je-meta-toggle">{ this.state.metaExpanded ? 'Collapse' : 'Expand' }</a>
           </div>
         </div>
         <div className="je-post-post">
